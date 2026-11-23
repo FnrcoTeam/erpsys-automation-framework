@@ -1,0 +1,9 @@
+target/
+allure-report/
+logs/
+*.log
+.vscode/
+.idea/
+*.iml
+src/test/resources/allure.properties
+NEXT_STEPS.md

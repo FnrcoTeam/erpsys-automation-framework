@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Logging setup. Log4j loads this file automatically because it sits at the root of the resources folder. -->
+<Configuration status="WARN">
+
+  <Properties>
+    <!-- All output stays under target/ so `./mvnw clean` removes it and Jenkins can archive it -->
+    <Property name="logDir">target/logs</Property>
+    <Property name="pattern">%d{HH:mm:ss.SSS} [%t] %-5level %c{1} - %msg%n</Property>
+  </Properties>
+
+  <Appenders>
+    <!-- Console: what you see in the terminal and in the Jenkins console -->
+    <Console name="Console" target="SYSTEM_OUT">
+      <PatternLayout pattern="${pattern}"/>
+    </Console>
+
+    <!-- File: one log per run, kept as evidence for failed tests -->
+    <File name="File" fileName="${logDir}/test-run.log" append="false">
+      <PatternLayout pattern="%d{yyyy-MM-dd HH:mm:ss.SSS} [%t] %-5level %c - %msg%n"/>
+    </File>
+  </Appenders>
+
+  <Loggers>
+    <!-- Our framework and tests: DEBUG in the file, INFO and above on the console -->
+    <Logger name="com.fnrco.erp" level="debug" additivity="false">
+      <AppenderRef ref="Console" level="info"/>
+      <AppenderRef ref="File"/>
+    </Logger>
+
+    <!-- Third-party libraries (Selenium, Netty, etc.): warnings and errors only -->
+    <Root level="warn">
+      <AppenderRef ref="Console"/>
+      <AppenderRef ref="File"/>
+    </Root>
+  </Loggers>
+
+</Configuration>
