@@ -34,7 +34,7 @@ public abstract class BasePage {
     protected void click(By locator) {
         wait.until(ExpectedConditions.elementToBeClickable(locator)).click();
     }
-    protected void type(By locator, String text) {
+    protected void typeText(By locator, String text) {
         WebElement field = waitVisible(locator);
         field.clear();
         field.sendKeys(text);
