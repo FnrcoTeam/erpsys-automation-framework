@@ -1,6 +1,8 @@
-package com.fnrco.erp.pages;
+package com.fnrco.erp.pages.authorization;
 
 import org.openqa.selenium.By;
+
+import com.fnrco.erp.pages.BasePage;
 
 public class LoginPage extends BasePage {
 
@@ -8,7 +10,7 @@ public class LoginPage extends BasePage {
 
     private final By username     = By.xpath("//input[@id='email' or @name='email']");
     private final By password     = By.xpath("//input[@id='password' or @name='password']");
-    private final By loginButton  = By.xpath("//button[@type='submit' and normalize-space()='Login']");    
+    private final By loginButton  = By.xpath("//button[@type='submit' and normalize-space()='Login']");
     private final By errorMessage = By.cssSelector("#email + .invalid-feedback");
 
     public LoginPage open() {

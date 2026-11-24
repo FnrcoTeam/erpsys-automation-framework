@@ -45,6 +45,7 @@ public final class DriverFactory {
         }
         if(!headless){
             driver.manage().window().maximize();
+
         }
         DRIVER.set(driver);
 

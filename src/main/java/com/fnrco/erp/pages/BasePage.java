@@ -19,10 +19,14 @@ public abstract class BasePage {
     protected final WebDriverWait wait;
     protected final Logger log = LogManager.getLogger(getClass());
 
+    // Title shown at the top of every ERP page after login (e.g. "Requests", "Create Request")
+    private final By pageTitle = By.cssSelector("h1.page-title");
+
     protected BasePage() {
         this.driver = DriverFactory.get();
         this.wait = new WebDriverWait(driver, Duration.ofSeconds(ConfigReader.getTimeout()));
     }
+
     protected void openPath(String path) {
         String url = ConfigReader.getBaseUrl() + path;
         log.info("Opening {}", url);
@@ -50,5 +54,34 @@ public abstract class BasePage {
             return false;
         }
     }
-    
+    // Waits until the URL contains the given part: use it after a click that opens another page
+    protected void waitForUrl(String urlPart) {
+        wait.until(ExpectedConditions.urlContains(urlPart));
+    }
+
+    // ---------- Select2 dropdowns (used across the ERP) ----------
+    // Select2 hides the real <select id="X"> and draws its own widget:
+    //   - the box you click:  <span id="select2-X-container" title="selected text">
+    //   - the options list:   <ul id="select2-X-results"><li role="option">...</li></ul>
+    //   - a search box inside the open dropdown
+    protected void selectSelect2Option(String selectId, String optionText) {
+        log.info("Selecting '{}' in {}", optionText, selectId);
+        click(By.id("select2-" + selectId + "-container"));
+        typeText(By.cssSelector(".select2-container--open .select2-search__field"), optionText);
+        click(By.xpath("//ul[@id='select2-" + selectId + "-results']/li[normalize-space()='"
+                + optionText + "']"));
+    }
+
+    protected String getSelect2Selected(String selectId) {
+        String title = waitVisible(By.id("select2-" + selectId + "-container")).getAttribute("title");
+        return title == null ? "" : title.trim();
+    }
+
+    public String getPageTitle() {
+        return textOf(pageTitle).trim();
+    }
+
+    public String getCurrentUrl() {
+        return driver.getCurrentUrl();
+    }
 }

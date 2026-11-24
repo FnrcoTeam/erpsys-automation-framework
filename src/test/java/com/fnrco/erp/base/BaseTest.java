@@ -11,7 +11,10 @@ import org.testng.annotations.AfterClass;
 import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeClass;
 
+import com.fnrco.erp.config.ConfigReader;
 import com.fnrco.erp.driver.DriverFactory;
+import com.fnrco.erp.pages.authorization.DashboardPage;
+import com.fnrco.erp.pages.authorization.LoginPage;
 
 import io.qameta.allure.Allure;
 
@@ -45,6 +48,16 @@ public abstract class BaseTest {
     @AfterClass(alwaysRun = true)
     public void tearDown() {
         DriverFactory.remove();
+    }
+
+    // For module test classes (requests, MPR...) that need a logged-in user before their tests.
+    // Call it from the subclass's own @BeforeClass: TestNG runs the parent's setUp() first.
+    protected void loginAsDefaultUser() {
+        new LoginPage().open().loginAs(ConfigReader.getUsername(), ConfigReader.getPassword());
+        if (!new DashboardPage().isLoaded()) {
+            throw new IllegalStateException("Login failed for " + ConfigReader.getUsername()
+                    + ": dashboard did not load");
+        }
     }
 
     private void attachScreenshot(String testName) {

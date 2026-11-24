@@ -1,6 +1,8 @@
-package com.fnrco.erp.pages;
+package com.fnrco.erp.pages.authorization;
 
 import org.openqa.selenium.By;
+
+import com.fnrco.erp.pages.BasePage;
 
 public class DashboardPage extends BasePage {
 
