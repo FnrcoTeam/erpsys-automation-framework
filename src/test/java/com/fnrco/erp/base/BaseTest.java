@@ -50,14 +50,16 @@ public abstract class BaseTest {
         DriverFactory.remove();
     }
 
-    // For module test classes (requests, MPR...) that need a logged-in user before their tests.
+    // For module test classes (requests, onboarding...) that need a logged-in user before their tests.
     // Call it from the subclass's own @BeforeClass: TestNG runs the parent's setUp() first.
     protected void loginAsDefaultUser() {
         new LoginPage().open().loginAs(ConfigReader.getUsername(), ConfigReader.getPassword());
-        if (!new DashboardPage().isLoaded()) {
+        DashboardPage dashboard = new DashboardPage();
+        if (!dashboard.isLoaded()) {
             throw new IllegalStateException("Login failed for " + ConfigReader.getUsername()
                     + ": dashboard did not load");
         }
+        dashboard.closeAnnouncementIfShown();
     }
 
     private void attachScreenshot(String testName) {

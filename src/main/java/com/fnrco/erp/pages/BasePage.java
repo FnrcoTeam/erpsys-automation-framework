@@ -1,10 +1,13 @@
 package com.fnrco.erp.pages;
 
 import java.time.Duration;
+import java.util.List;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.openqa.selenium.By;
+import org.openqa.selenium.ElementClickInterceptedException;
+import org.openqa.selenium.JavascriptExecutor;
 import org.openqa.selenium.TimeoutException;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
@@ -22,6 +25,9 @@ public abstract class BasePage {
     // Title shown at the top of every ERP page after login (e.g. "Requests", "Create Request")
     private final By pageTitle = By.cssSelector("h1.page-title");
 
+    private final By supportTip      = By.id("support-tour-popover");
+    private final By supportTipGotIt = By.id("dismiss-support-tour");
+
     protected BasePage() {
         this.driver = DriverFactory.get();
         this.wait = new WebDriverWait(driver, Duration.ofSeconds(ConfigReader.getTimeout()));
@@ -35,8 +41,34 @@ public abstract class BasePage {
     protected WebElement waitVisible(By locator) {
         return wait.until(ExpectedConditions.visibilityOfElementLocated(locator));
     }
+    // Scrolls the element to the middle of the screen first ('instant': the ERP uses smooth
+    // scrolling, and a click during the scroll misses), then waits until it can be clicked
     protected void click(By locator) {
-        wait.until(ExpectedConditions.elementToBeClickable(locator)).click();
+        WebElement element = wait.until(ExpectedConditions.presenceOfElementLocated(locator));
+        ((JavascriptExecutor) driver).executeScript(
+                "arguments[0].scrollIntoView({block: 'center', behavior: 'instant'});", element);
+        try {
+            wait.until(ExpectedConditions.elementToBeClickable(locator)).click();
+        } catch (ElementClickInterceptedException e) {
+            // Usually the "Need Assistance?" tip that pops up a few seconds after a page loads
+            if (!dismissSupportTip()) {
+                throw e;
+            }
+            wait.until(ExpectedConditions.elementToBeClickable(locator)).click();
+        }
+    }
+
+    // "Need Assistance? ... Got it!" tip next to the support button (bottom right).
+    // Returns true if it was open and has been closed.
+    protected boolean dismissSupportTip() {
+        List<WebElement> tips = driver.findElements(supportTip);
+        if (tips.isEmpty() || !tips.get(0).isDisplayed()) {
+            return false;
+        }
+        log.info("Closing the 'Need Assistance?' tip");
+        driver.findElement(supportTipGotIt).click();
+        wait.until(ExpectedConditions.invisibilityOfElementLocated(supportTip));
+        return true;
     }
     protected void typeText(By locator, String text) {
         WebElement field = waitVisible(locator);
